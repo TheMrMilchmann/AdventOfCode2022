@@ -36,4 +36,5 @@ fun main() {
     }
 
     println("Part 1: ${data.maxOfOrNull { it.sum() }} ")
+    println("Part 2: ${data.map { it.sum() }.sortedDescending().take(3).sum()} ")
 }
