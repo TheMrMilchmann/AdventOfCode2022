@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.jetbrains.kotlin.gradle.tasks.*
+
 plugins {
     kotlin("jvm") version "1.7.21"
 }
@@ -26,6 +28,16 @@ plugins {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(19))
+    }
+}
+
+tasks {
+    withType<JavaCompile> {
+        options.release.set(18)
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "18"
     }
 }
 
