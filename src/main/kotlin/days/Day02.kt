@@ -29,40 +29,68 @@ fun main() {
         a to b
     }
 
+    fun String.toMove() = when (this) {
+        "A", "X" -> Move.Rock
+        "B", "Y" -> Move.Paper
+        "C", "Z" -> Move.Scissor
+        else -> error("Unknown move: $this")
+    }
+
     fun part1(): Int {
         val rounds = data.map { (a, b) ->
-            fun String.toMove() = when (this) {
-                "A", "X" -> Move.Rock
-                "B", "Y" -> Move.Paper
-                "C", "Z" -> Move.Scissor
-                else -> error("Unknown move: $this")
-            }
-
             a.toMove() to b.toMove()
         }
 
         return rounds.sumOf { (opponent, reaction) ->
-            val basePoints = when (reaction) {
-                Move.Rock -> 1
-                Move.Paper -> 2
-                Move.Scissor -> 3
-            }
-
             val resultPoints = when {
-                Move.values()[(opponent.ordinal + 1) % 3] == reaction -> 6
-                opponent == reaction -> 3
-                else -> 0
+                Move.cachedValues[(opponent.ordinal + 1) % 3] == reaction -> Result.Victory.points
+                opponent == reaction -> Result.Draw.points
+                else -> Result.Defeat.points
             }
 
-            basePoints + resultPoints
+            reaction.points + resultPoints
+        }
+    }
+
+    fun part2(): Int {
+        val rounds = data.map { (a, b) ->
+            val result = when (b) {
+                "X" -> Result.Defeat
+                "Y" -> Result.Draw
+                "Z" -> Result.Victory
+                else -> error("Unknown result: $b")
+            }
+
+            a.toMove() to result
+        }
+
+        return rounds.sumOf { (opponent, result) ->
+            val movePoints = when (result) {
+                Result.Defeat -> Move.cachedValues[(opponent.ordinal + 2) % 3].points
+                Result.Draw -> opponent.points
+                Result.Victory -> Move.cachedValues[(opponent.ordinal + 1) % 3].points
+            }
+
+            result.points + movePoints
         }
     }
 
     println("Part 1: ${part1()} ")
+    println("Part 2: ${part2()} ")
 }
 
-private enum class Move {
-    Rock,
-    Paper,
-    Scissor
+private enum class Move(val points: Int) {
+    Rock(1),
+    Paper(2),
+    Scissor(3);
+
+    companion object {
+        val cachedValues = values()
+    }
+}
+
+private enum class Result(val points: Int) {
+    Defeat(0),
+    Draw(3),
+    Victory(6)
 }
