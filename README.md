@@ -1,6 +1,6 @@
 # AdventOfCode 2022
 
-My solutions to the "Advent of Code 2022" puzzles using Kotlin 1.7 and Java 19.
+My solutions to the "Advent of Code 2022" puzzles using Kotlin 1.7 and Java 18.
 
 **Inputs are not provided** [as requested by the AoC author](https://twitter.com/ericwastl/status/1465805354214830081).
 They should be placed under `src/main/resources/days/DayXX.txt` where `XX` is
