@@ -42,13 +42,8 @@ fun main() {
         }
 
         return rounds.sumOf { (opponent, reaction) ->
-            val resultPoints = when {
-                Move.cachedValues[(opponent.ordinal + 1) % 3] == reaction -> Result.Victory.points
-                opponent == reaction -> Result.Draw.points
-                else -> Result.Defeat.points
-            }
-
-            reaction.points + resultPoints
+            val result = Result.values().find { reaction == opponent.getReactionFor(it) }!!
+            reaction.points + result.points
         }
     }
 
@@ -64,15 +59,7 @@ fun main() {
             a.toMove() to result
         }
 
-        return rounds.sumOf { (opponent, result) ->
-            val movePoints = when (result) {
-                Result.Defeat -> Move.cachedValues[(opponent.ordinal + 2) % 3].points
-                Result.Draw -> opponent.points
-                Result.Victory -> Move.cachedValues[(opponent.ordinal + 1) % 3].points
-            }
-
-            result.points + movePoints
-        }
+        return rounds.sumOf { (opponent, result) -> result.points + opponent.getReactionFor(result).points }
     }
 
     println("Part 1: ${part1()} ")
@@ -84,13 +71,16 @@ private enum class Move(val points: Int) {
     Paper(2),
     Scissor(3);
 
+    fun getReactionFor(result: Result): Move =
+        result.selectReaction(this)
+
     companion object {
         val cachedValues = values()
     }
 }
 
-private enum class Result(val points: Int) {
-    Defeat(0),
-    Draw(3),
-    Victory(6)
+private enum class Result(val points: Int, val selectReaction: (Move) -> Move) {
+    Defeat(0, { Move.cachedValues[(it.ordinal + 2) % 3] }),
+    Draw(3, { it }),
+    Victory(6, { Move.cachedValues[(it.ordinal + 1) % 3] })
 }
