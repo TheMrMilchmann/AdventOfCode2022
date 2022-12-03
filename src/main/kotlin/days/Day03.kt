@@ -40,5 +40,12 @@ fun main() {
         return data.sumOf { (a, b) -> a.single { it in b }.toPriority() }
     }
 
+    fun part2(): Int {
+        return data.map { (a, b) -> a + b }
+            .chunked(3)
+            .sumOf { it.reduce { acc, set -> acc.filter { it in set }.toSet() }.single().toPriority() }
+    }
+
     println("Part 1: ${part1()}")
+    println("Part 1: ${part2()}")
 }
