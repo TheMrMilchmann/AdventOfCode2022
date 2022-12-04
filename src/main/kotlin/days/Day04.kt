@@ -37,6 +37,8 @@ fun main() {
     operator fun IntRange.contains(other: IntRange): Boolean = start <= other.first && other.last <= endInclusive
 
     fun part1(): Int = data.count { (first, second) -> first in second || second in first }
+    fun part2(): Int = data.count { (first, second) -> first.any { it in second } }
 
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
