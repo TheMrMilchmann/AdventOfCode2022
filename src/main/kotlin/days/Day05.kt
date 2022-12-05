@@ -46,7 +46,7 @@ fun main() {
 
     fun part1(): String {
         @Suppress("NAME_SHADOWING")
-        val stacks = stacks.clone()
+        val stacks = Array(9) { ArrayDeque(stacks[it]) }
 
         for (move in moves) {
             for (i in 0 until move.amount) {
@@ -58,5 +58,25 @@ fun main() {
         return stacks.joinToString(separator = "") { it.last().toString() }
     }
 
+    fun part2(): String {
+        @Suppress("NAME_SHADOWING")
+        val stacks = Array(9) { ArrayDeque(stacks[it]) }
+
+        for (move in moves) {
+            val its = buildList {
+                for (i in 0 until move.amount) {
+                    add(0, stacks[move.fromIndex].removeLast())
+                }
+            }
+
+            for (it in its) {
+                stacks[move.toIndex].addLast(it)
+            }
+        }
+
+        return stacks.joinToString(separator = "") { it.last().toString() }
+    }
+
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
