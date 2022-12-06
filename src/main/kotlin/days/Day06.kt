@@ -26,5 +26,13 @@ import utils.*
 fun main() {
     val data = readInput().single()
 
-    println("Part 1: ${data.withIndex().windowed(size = 4).first { it.distinctBy(IndexedValue<Char>::value).count() == 4 }.last().index + 1}")
+    fun getIndex(length: Int) =
+        1 + data.withIndex()
+            .windowed(size = length)
+            .first { it.distinctBy(IndexedValue<Char>::value).count() == length }
+            .last()
+            .index
+
+    println("Part 1: ${getIndex(length = 4)}")
+    println("Part 2: ${getIndex(length = 14)}")
 }
