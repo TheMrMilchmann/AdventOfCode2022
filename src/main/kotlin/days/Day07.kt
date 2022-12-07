@@ -52,7 +52,19 @@ fun main() {
 
 //    println(root.printToString())
 
-    println("Part 1: ${root.directorySequence().sumOf { if (it.size <= 100000) it.size else 0 }}")
+    fun part1(): Long = root.directorySequence().sumOf { if (it.size <= 100000) it.size else 0 }
+
+    fun part2(): Long {
+        val TOTAL_SPACE = 70_000_000L
+        val MIN_UNUSED_SPACE = 30_000_000L
+
+        // Just assumes that we have to delete stuff
+        val minSizeToDelete = MIN_UNUSED_SPACE - (TOTAL_SPACE - root.size)
+        return root.directorySequence().filter { it.size >= minSizeToDelete }.minOf { it.size }
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
 
 private fun Directory.printToString(): String = buildString {
