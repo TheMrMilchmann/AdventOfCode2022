@@ -25,19 +25,38 @@ import utils.*
 
 fun main() {
     val grid = readInput().map { it.toCharArray().map(Char::digitToInt) }.toGrid()
-    var count = 0
 
-    for (y in grid.verticalIndices) {
-        for (x in grid.horizontalIndices) {
-            if (grid.beam(GridPos(x, y), grid::shiftUp).all { grid[it] < grid[x, y] }
-                || grid.beam(GridPos(x, y), grid::shiftDown).all { grid[it] < grid[x, y] }
-                || grid.beam(GridPos(x, y), grid::shiftLeft).all { grid[it] < grid[x, y] }
-                || grid.beam(GridPos(x, y), grid::shiftRight).all { grid[it] < grid[x, y] }
-            ) {
-                count++
+    fun part1(): Int {
+        var count = 0
+
+        for (y in grid.verticalIndices) {
+            for (x in grid.horizontalIndices) {
+                if (grid.beam(GridPos(x, y), grid::shiftUp).all { grid[it] < grid[x, y] }
+                    || grid.beam(GridPos(x, y), grid::shiftDown).all { grid[it] < grid[x, y] }
+                    || grid.beam(GridPos(x, y), grid::shiftLeft).all { grid[it] < grid[x, y] }
+                    || grid.beam(GridPos(x, y), grid::shiftRight).all { grid[it] < grid[x, y] }
+                ) {
+                    count++
+                }
             }
         }
+
+        return count
     }
 
-    println("Part 1: $count")
+    fun part2() =
+        grid.positions.maxOfOrNull { pos ->
+            listOf(
+                grid.beam(pos, grid::shiftUp),
+                grid.beam(pos, grid::shiftDown),
+                grid.beam(pos, grid::shiftLeft),
+                grid.beam(pos, grid::shiftRight)
+            ).map { beam ->
+                val res = beam.takeWhile { grid[it] < grid[pos] }.count()
+                if (res == beam.size) res else res + 1
+            }.reduce { acc, i -> acc * i }
+        }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
