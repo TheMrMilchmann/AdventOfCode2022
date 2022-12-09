@@ -69,7 +69,37 @@ fun main() {
         return visited.size
     }
 
+    fun part2(): Int {
+        val visited = mutableSetOf<Point>()
+        val rope = MutableList(10) { Point(0, 0) }
+        visited += rope.last()
+
+        for (move in moves) {
+            for (s in 0 until move.steps) {
+                rope[0] = move.dir.advance(rope[0])
+
+                for (i in 1 until rope.size) {
+                    val prevPos = rope[i - 1]
+                    val tailPos = rope[i]
+
+                    if (!tailPos.isAdjacent(prevPos)) {
+                        rope[i] = Point(
+                            tailPos.x + (prevPos.x - tailPos.x).sign,
+                            tailPos.y + (prevPos.y - tailPos.y).sign
+                        )
+                    }
+
+                }
+
+                visited += rope.last()
+            }
+        }
+
+        return visited.size
+    }
+
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
 
 private data class Point(val x: Int, val y: Int)
