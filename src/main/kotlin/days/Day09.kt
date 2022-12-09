@@ -45,33 +45,9 @@ fun main() {
     fun Point.isAdjacent(other: Point): Boolean =
         x - other.x in -1..1 && y - other.y in -1..1
 
-    fun part1(): Int {
+    fun solve(length: Int): Int {
         val visited = mutableSetOf<Point>()
-        var headPos = Point(0, 0)
-        var tailPos = Point(0, 0)
-        visited += tailPos
-
-        for (move in moves) {
-            for (s in 0 until move.steps) {
-                headPos = move.dir.advance(headPos)
-
-                if (!tailPos.isAdjacent(headPos)) {
-                    tailPos = Point(
-                        tailPos.x + (headPos.x - tailPos.x).sign,
-                        tailPos.y + (headPos.y - tailPos.y).sign
-                    )
-
-                    visited += tailPos
-                }
-            }
-        }
-
-        return visited.size
-    }
-
-    fun part2(): Int {
-        val visited = mutableSetOf<Point>()
-        val rope = MutableList(10) { Point(0, 0) }
+        val rope = MutableList(length) { Point(0, 0) }
         visited += rope.last()
 
         for (move in moves) {
@@ -98,8 +74,8 @@ fun main() {
         return visited.size
     }
 
-    println("Part 1: ${part1()}")
-    println("Part 2: ${part2()}")
+    println("Part 1: ${solve(2)}")
+    println("Part 2: ${solve(10)}")
 }
 
 private data class Point(val x: Int, val y: Int)
