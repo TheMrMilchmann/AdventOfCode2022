@@ -64,7 +64,6 @@ fun main() {
                             tailPos.y + (prevPos.y - tailPos.y).sign
                         )
                     }
-
                 }
 
                 visited += rope.last()
