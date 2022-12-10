@@ -24,27 +24,20 @@ package days
 import utils.*
 
 fun main() {
-    val data = readInput()
+    val data = readInput().flatMap<_, (Int) -> Int> { line ->
+        when (line) {
+            "noop" -> listOf { it }
+            else -> listOf({ it }, { it + line.split(" ")[1].toInt() })
+        }
+    }.runningFold(initial = 1) { acc, it -> it(acc) }
 
     fun part1(): Int =
-        data.flatMap<_, (Int) -> Int> { line ->
-            when (line) {
-                "noop" -> listOf( { it })
-                else -> listOf({ it }, { it + line.split(" ")[1].toInt() })
-            }
-        }.runningFold(initial = 1) { acc, it -> it(acc) }
-            .withIndex()
+        data.withIndex()
             .filter { (index, _) -> (21 + index) % 40 == 0 }
             .sumOf { (index, value) -> (index + 1) * value }
 
     fun part2(): String =
-        data.flatMap<_, (Int) -> Int> { line ->
-            when (line) {
-                "noop" -> listOf( { it })
-                else -> listOf({ it }, { it + line.split(" ")[1].toInt() })
-            }
-        }.runningFold(initial = 1) { acc, it -> it(acc) }
-            .take(240)
+        data.take(240)
             .chunked(40)
             .map { row ->
                 row.mapIndexed { index, value -> (index) in (value - 1)..(value + 1) }
