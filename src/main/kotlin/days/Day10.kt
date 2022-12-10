@@ -40,7 +40,7 @@ fun main() {
         data.take(240)
             .chunked(40)
             .map { row ->
-                row.mapIndexed { index, value -> (index) in (value - 1)..(value + 1) }
+                row.mapIndexed { index, value -> index in (value - 1)..(value + 1) }
             }
             .joinToString(separator = "\n") {
                 it.joinToString(separator = "") { if (it) "█" else " " }
