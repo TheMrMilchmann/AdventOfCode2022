@@ -25,25 +25,26 @@ import utils.*
 
 fun main() {
     class Monkey(
-        val startingItems: List<Int>,
-        val operation: (Int) -> Int,
-        val findTarget: (Int) -> Int
+        val startingItems: List<Long>,
+        val operation: (Long) -> Long,
+        val testDivisor: Int,
+        val findTarget: (Long) -> Int
     )
 
     val monkeys = readInput().asSequence()
         .filter { it.isNotBlank() }
         .chunked(size = 6) { lines ->
-            val startingItems = lines[1].trim().removePrefix("Starting items: ").split(", ").map(String::toInt)
-            val operation: (Int) -> Int = lines[2].trim().removePrefix("Operation: new = old ").let { src ->
-                val op: Int.(Int) -> Int = when (src[0]) {
-                    '+' -> Int::plus
-                    '*' -> Int::times
+            val startingItems = lines[1].trim().removePrefix("Starting items: ").split(", ").map(String::toLong)
+            val operation: (Long) -> Long = lines[2].trim().removePrefix("Operation: new = old ").let { src ->
+                val op: Long.(Long) -> Long = when (src[0]) {
+                    '+' -> Long::plus
+                    '*' -> Long::times
                     else -> error("Unknown operation: $src")
                 }
 
                 when (val value = src.substring(startIndex = 2)) {
                     "old" -> {{ it.op(it) }}
-                    else -> {{ it.op(value.toInt()) }}
+                    else -> {{ it.op(value.toLong()) }}
                 }
             }
 
@@ -51,20 +52,21 @@ fun main() {
             val testPositiveTarget = lines[4].substringAfterLast(' ').toInt()
             val testNegativeTarget = lines[5].substringAfterLast(' ').toInt()
 
-            val findTarget: (Int) -> Int = { if (it % testDivisor == 0) testPositiveTarget else testNegativeTarget }
+            val findTarget: (Long) -> Int = { if (it % testDivisor == 0L) testPositiveTarget else testNegativeTarget }
 
             Monkey(
                 startingItems,
                 operation,
+                testDivisor,
                 findTarget
             )
         }.toList()
 
-    fun part1(): Int {
+    fun solve(rounds: Int, reduceWorryLevel: (Long) -> Long): Long {
         val inspections = IntArray(monkeys.size)
         val inventories = List(monkeys.size) { ArrayList(monkeys[it].startingItems) }
 
-        repeat(20) {
+        repeat(rounds) {
             monkeys.forEachIndexed { index, monkey ->
                 val items = inventories[index]
                 inspections[index] += items.size
@@ -76,7 +78,7 @@ fun main() {
                     itr.remove()
 
                     item = monkey.operation(item)
-                    item /= 3
+                    item = reduceWorryLevel(item)
 
                     val target = monkey.findTarget(item)
                     inventories[target].add(item)
@@ -84,8 +86,11 @@ fun main() {
             }
         }
 
-        return inspections.sortedDescending().take(2).reduce(Int::times)
+        return inspections.sortedDescending().take(2).map(Int::toLong).reduce(Long::times)
     }
 
-    println("Part 1: ${part1()}")
+    println("Part 1: ${solve(20) { it / 3 }}")
+
+    val base = monkeys.map(Monkey::testDivisor).reduce(Int::times)
+    println("Part 2: ${solve(10_000) { it % base }}")
 }
