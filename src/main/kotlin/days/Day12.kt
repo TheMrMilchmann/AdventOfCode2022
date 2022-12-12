@@ -26,10 +26,18 @@ import java.util.*
 
 fun main() {
     val grid = readInput().map(String::toList).toGrid()
-    val (startingPos) = grid.positions.zip(grid).single { (_, v) -> v == 'S' }
-    val (targetPos) = grid.positions.zip(grid).single { (_, v) -> v == 'E' }
 
-    fun Grid<Char>.part1(): Int {
+    fun Char.toElevation() = when (this) {
+        'E' -> 'z'
+        'S' -> 'a'
+        else -> this
+    }
+
+    fun Grid<Char>.solve(
+        startingPos: GridPos,
+        isDestination: (GridPos) -> Boolean,
+        canMoveTo: GridPos.(GridPos) -> Boolean
+    ): Int {
         fun flatIndexOf(pos: GridPos) =
             (pos.y.intValue * width) + pos.x.intValue
 
@@ -42,20 +50,13 @@ fun main() {
         while (queue.isNotEmpty()) {
             val (pos, _) = queue.remove()
             val index = flatIndexOf(pos)
-            if (pos == targetPos) return steps[index]
+            if (isDestination(pos)) return steps[index]
 
             for (vPos in getAdjacentPositions(pos)) {
                 val vIndex = flatIndexOf(vPos)
-
-                fun Char.toElevation() = when (this) {
-                    'E' -> 'z'
-                    'S' -> 'a'
-                    else -> this
-                }
-
                 val alt = steps[index] + 1
 
-                if (alt < steps[vIndex] && this[pos].toElevation() + 1 >= this[vPos].toElevation()) {
+                if (alt < steps[vIndex] && pos.canMoveTo(vPos)) {
                     steps[vIndex] = alt
                     queue.add(vPos to alt)
                 }
@@ -65,5 +66,18 @@ fun main() {
         error("Step calculation aborted unexpectedly")
     }
 
-    println("Part 1: ${grid.part1()}")
+    fun part1(): Int {
+        val (startingPos) = grid.positions.zip(grid).single { (_, v) -> v == 'S' }
+        val (targetPos) = grid.positions.zip(grid).single { (_, v) -> v == 'E' }
+
+        return grid.solve(startingPos, { it == targetPos }, { grid[this].toElevation() + 1 >= grid[it].toElevation() })
+    }
+
+    fun part2(): Int {
+        val (startingPos) = grid.positions.zip(grid).single { (_, v) -> v == 'E' }
+        return grid.solve(startingPos, { grid[it].toElevation() == 'a' }, { grid[it].toElevation() + 1 >= grid[this].toElevation() })
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
