@@ -50,12 +50,29 @@ fun main() {
         }
     }
 
-    val data = readInput().filter(String::isNotBlank)
-        .map { parse(ParserState(it, 0)) }
-        .chunked(2)
-        .map { (a, b) -> a to b }
+    val data = readInput().filter(String::isNotBlank).map { parse(ParserState(it, 0)) }
 
-    println("Part 1: ${data.withIndex().filter { (_, pair)  -> pair.first < pair.second }.sumOf { (index, _) -> index + 1 }}")
+    fun part1(): Int =
+        data.chunked(2) { (a, b) -> a to b }.withIndex().filter { (_, pair)  -> pair.first < pair.second }.sumOf { (index, _) -> index + 1 }
+
+    fun part2(): Int {
+        val divider2 = Day13List(Day13List(listOf(Day13Int(2))))
+        val divider6 = Day13List(Day13List(listOf(Day13Int(6))))
+
+        return buildList {
+            addAll(data)
+            add(divider2)
+            add(divider6)
+        }
+            .also { println(it.indexOf(divider2)) }
+            .sortedWith(Day13Node::compareTo)
+            .withIndex()
+            .map { (i, packet) -> if (packet == divider2 || packet == divider6) i + 1 else 1 }
+            .reduce(Int::times)
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
 
 
