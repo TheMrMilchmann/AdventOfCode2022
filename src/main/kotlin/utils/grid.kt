@@ -138,6 +138,9 @@ class Grid<E>(
         this[pos.x, pos.y]
 
     operator fun get(x: HPos, y: VPos): E {
+        require(x.intValue in 0 until width) { "HPos out of grid bounds: ${x.intValue} is not in [0, ${width - 1}]" }
+        require(y.intValue in 0 until height) { "VPos out of grid bounds: ${y.intValue} is not in [0, ${height - 1}]" }
+
         return grid[y.intValue * width + x.intValue]
     }
 
@@ -192,3 +195,4 @@ class Grid<E>(
         grid.chunked(width).joinToString(separator = System.lineSeparator()) { it.joinToString(separator = "") { transform(it) } }
 
 }
+
