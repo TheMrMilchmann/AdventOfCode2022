@@ -46,10 +46,10 @@ fun main() {
     }
 
     val width = maxOf(maxX, maxY + 502)
-    val height = maxY + 1
+    val height = maxY + 3
 
     data class GridElement(
-        var isOccupied: Char = '.'
+        var occupiance: Char = '.'
     )
 
     val grid = Grid(width, height) { GridElement() }
@@ -57,35 +57,37 @@ fun main() {
     for (line in lines) {
         if (line.start.y == line.end.y) {
             for (x in minOf(line.start.x, line.end.x)..maxOf(line.start.x, line.end.x)) {
-                grid[x.hPos, line.start.y.vPos].isOccupied = '#'
+                grid[x.hPos, line.start.y.vPos].occupiance = '#'
             }
         } else if (line.start.x == line.end.x) {
             for (y in minOf(line.start.y, line.end.y)..maxOf(line.start.y, line.end.y)) {
-                grid[line.start.x.hPos, y.vPos].isOccupied = '#'
+                grid[line.start.x.hPos, y.vPos].occupiance = '#'
             }
         } else {
             error("Unexpected line: $line")
         }
     }
 
+    grid.horizontalIndices.forEach { x -> grid[x, grid.verticalIndices.last()].occupiance = '#' }
+
     fun fall(grid: Grid<GridElement>, startX: Int = 500, startY: Int = 0): Point {
         var x = startX.hPos
         var y = startY.vPos
 
-        loop@while (y.intValue < maxY) {
+        loop@while (y.intValue < height - 2) {
             val ny = y + 1
 
             when {
-                grid[x, ny].isOccupied == '.' -> {}
-                grid[x - 1, ny].isOccupied == '.' -> x -= 1
-                grid[x + 1, ny].isOccupied == '.' -> x += 1
+                grid[x, ny].occupiance == '.' -> {}
+                grid[x - 1, ny].occupiance == '.' -> x -= 1
+                grid[x + 1, ny].occupiance == '.' -> x += 1
                 else -> break@loop
             }
 
             y = ny
         }
 
-        grid[x, y].isOccupied = '+'
+        grid[x, y].occupiance = '+'
         return Point(x.intValue, y.intValue)
     }
 
@@ -97,5 +99,14 @@ fun main() {
             .count()
     }
 
+    fun part2(): Int {
+        val g = grid.map { _, it -> it.copy() }
+
+        return generateSequence { fall(g) }
+            .takeWhile { it.y != 0 }
+            .count() + 1
+    }
+
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
