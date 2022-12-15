@@ -22,7 +22,6 @@
 package days
 
 import utils.*
-import java.math.BigInteger
 import kotlin.math.*
 
 fun main() {
@@ -32,75 +31,21 @@ fun main() {
 
     data class Line(val a: Point, val b: Point) {
 
-        private val mc by lazy {
-            val l: Point
-            val r: Point
-
-            if (a.x <= b.x) {
-                l = a
-                r = b
-            } else {
-                l = b
-                r = a
-            }
-
-            (r.y - l.y).sign
-        }
-
-        private val bc by lazy {
-            (-(if (a.x <= b.x) a else b).y).also { println("bc: $it") }
-        }
-
-        infix fun Long.minusSafe(other: Long): Long {
-            val res = this - other
-            check(res < this == other > 0) { "Subtraction overflow: $this - $other" }
-            return res
-        }
-
-        infix fun Long.timesSafe(other: Long): Long {
-            val res = this * other
-            check(other == 0L || res / other == this) { "Multiplication overflow: $this * $other" }
-            return res
-        }
-
-        infix fun Long.timesSafe(other: Int): Long = timesSafe(other.toLong())
-
-        operator fun contains(point: Point): Boolean {
-            val dAX = a.x minusSafe point.x
-            val dAY = a.y minusSafe point.y
-
-            val dBX = b.x minusSafe point.x
-            val dBY = b.y minusSafe point.y
-
-            if ((dAX timesSafe dBY) minusSafe (dAY timesSafe dBX) == 0L) return false
-            return point.x in minOf(a.x, b.x)..maxOf(a.x, b.x) && point.y in minOf(a.y, b.y)..maxOf(a.y, b.y)
-        }
-
         infix fun intersect(other: Line): Point? {
-//            if (mc == other.mc) return null
-//
-//            val x = (other.bc - bc).toDouble() / (mc - other.mc)
-//            println("$x")
-//
-//            val y = mc * x + bc
-//
-//            return Point(x.toLong(), y.toLong()).also(::println)
+            val abX = a.x - b.x
+            val abY = a.y - b.y
+            val acX = a.x - other.a.x
+            val acY = a.y - other.a.y
+            val cdX = other.a.x - other.b.x
+            val cdY = other.a.y - other.b.y
 
-            val abY = b.y minusSafe a.y
-            val baX = a.x minusSafe b.x
-
-            val cdY = other.b.y minusSafe other.a.y
-            val dcX = other.a.x minusSafe other.b.x
-
-            val det = (abY timesSafe dcX) minusSafe (cdY timesSafe baX)
-            if (det == 0L) return null
-
-            val eAB = BigInteger.valueOf((abY timesSafe a.x)) + BigInteger.valueOf((baX timesSafe a.y))
-            val eCD = BigInteger.valueOf((cdY timesSafe other.a.x)) + BigInteger.valueOf((dcX timesSafe other.b.y))
+            val t = (acX.toDouble() * cdY - acY * cdX) / (abX * cdY - abY * cdX)
+            val u = (acX.toDouble() * abY - acY * abX) / (abX * cdY - abY * cdX)
+            if (t < 0 || 1 < t || u < 0 || 1 < u) return null
 
             return Point(
-                x = ((BigInteger.valueOf(dcX) * eAB - BigInteger.valueOf(baX) * eCD) / BigInteger.valueOf(det)).toLong(),
-                y = ((BigInteger.valueOf(abY) * eCD - BigInteger.valueOf(cdY) * eAB) / BigInteger.valueOf(det)).toLong()
+                x = (a.x + t * (b.x - a.x)).toLong(),
+                y = (a.y + t * (b.y - a.y)).toLong()
             )
         }
 
@@ -118,17 +63,6 @@ fun main() {
 
             val horizontalDistance = range - verticalDistance
             return (center.x - horizontalDistance)..(center.x + horizontalDistance)
-        }
-
-        fun getBorder(): Set<Point> = buildSet {
-            for (i in -(range + 1)..range + 1) {
-                val y = center.y + i
-                val verticalDistance = abs(center.y - y)
-                val horizontalDistance = (range + 1) - verticalDistance
-
-                add(Point(center.x - horizontalDistance, y))
-                add(Point(center.x + horizontalDistance, y))
-            }
         }
 
     }
@@ -150,35 +84,29 @@ fun main() {
     fun part2(): Long {
         val space = 4_000_000L
 
-//        val lines = sequence {
-//            yield(Line(Point(0, 0), Point(space, 0)))
-//            yield(Line(Point(0, 0), Point(0, space)))
-//            yield(Line(Point(space, 0), Point(space, space)))
-//            yield(Line(Point(0, space), Point(space, space)))
-//
-//            scanAreas.forEach {
-//                val t = it.center.copy(y = it.center.y - it.range)
-//                val b = it.center.copy(y = it.center.y + it.range)
-//                val l = it.center.copy(x = it.center.x - it.range)
-//                val r = it.center.copy(x = it.center.x + it.range)
-//
-//                yield(Line(t, r))
-//                yield(Line(r, b))
-//                yield(Line(b, l))
-//                yield(Line(l, t))
-//            }
-//        }
-//
-//        val (x, y) = lines.flatMap { a -> lines.mapNotNull { b -> a intersect b } }
-//            .filter { (x, y) -> x in 0..space && y in 0..space }
-//            .find { p -> scanAreas.none { it.center distanceTo p < it.range } }!!
+        val lines = sequence {
+            yield(Line(Point(0, 0), Point(space, 0)))
+            yield(Line(Point(0, 0), Point(0, space)))
+            yield(Line(Point(space, 0), Point(space, space)))
+            yield(Line(Point(0, space), Point(space, space)))
 
-        val (x, y) = scanAreas.flatMap { it.getBorder() }
-            .toSet()
+            scanAreas.forEach {
+                val t = it.center.copy(y = it.center.y - it.range - 1)
+                val b = it.center.copy(y = it.center.y + it.range + 1)
+                val l = it.center.copy(x = it.center.x - it.range - 1)
+                val r = it.center.copy(x = it.center.x + it.range + 1)
+
+                yield(Line(t, r))
+                yield(Line(r, b))
+                yield(Line(b, l))
+                yield(Line(l, t))
+            }
+        }
+
+        val (x, y) = lines.flatMap { a -> lines.mapNotNull { b -> a intersect b } }
             .filter { (x, y) -> x in 0..space && y in 0..space }
             .find { p -> scanAreas.none { it.center distanceTo p <= it.range } }!!
 
-        println("X: $x, Y: $y")
         return (x * space) + y
     }
 
