@@ -105,7 +105,7 @@ fun main() {
 
         val (x, y) = lines.flatMap { a -> lines.mapNotNull { b -> a intersect b } }
             .filter { (x, y) -> x in 0..space && y in 0..space }
-            .find { p -> scanAreas.none { it.center distanceTo p <= it.range } }!!
+            .first { p -> scanAreas.none { it.center distanceTo p <= it.range } }
 
         return (x * space) + y
     }
